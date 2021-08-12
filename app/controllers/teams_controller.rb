@@ -1,12 +1,14 @@
 class TeamsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_team, only: [:show, :edit, :update, :destroy]
+  before_action :set_team, only: %i[show edit update destroy]
 
   def index
     @teams = Team.all
   end
 
   def show
+    @working_team = @team
+    change_keep_team(current_user, @team)
   end
 
   def new
@@ -14,38 +16,48 @@ class TeamsController < ApplicationController
   end
 
   def edit
+    if @team.owner.id != current_user.id
+      redirect_to team_url, notice: I18n.t('views.messages.cannot_edit_other_member_except_leader')
+    end
   end
 
   def create
-    @team = current_user.teams.build(team_params)
-
+    @team = Team.new(team_params)
+    @team.owner = current_user
     if @team.save
-      redirect_to @team, notice: 'Team was successfully created.'
+      @team.invite_member(@team.owner)
+      redirect_to @team, notice: I18n.t('views.messages.create_team')
     else
+      flash.now[:error] = I18n.t('views.messages.failed_to_save_team')
       render :new
     end
   end
 
   def update
     if @team.update(team_params)
-      redirect_to @team, notice: 'Team was successfully updated.'
+      redirect_to @team, notice: I18n.t('views.messages.update_team')
     else
+      flash.now[:error] = I18n.t('views.messages.failed_to_save_team')
       render :edit
     end
   end
 
   def destroy
     @team.destroy
-    redirect_to teams_url, notice: 'Team was successfully destroyed.'
+    redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
+  end
+
+  def dashboard
+    @team = current_user.keep_team_id ? Team.find(current_user.keep_team_id) : current_user.teams.first
   end
 
   private
 
   def set_team
-    @team = Team.find(params[:id])
+    @team = Team.friendly.find(params[:id])
   end
 
   def team_params
-    params.fetch(:team, {}).permit(:name)
+    params.fetch(:team, {}).permit %i[name icon icon_cache owner_id keep_team_id]
   end
 end
