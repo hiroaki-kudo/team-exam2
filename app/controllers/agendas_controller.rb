@@ -22,8 +22,15 @@ class AgendasController < ApplicationController
   end
 
   def destroy
-    @agenda.destroy
-    redirect_to dashboard_path
+    @team = @agenda.team
+    @users = @team.members
+    if current_user.id ==  @agenda.user_id || current_user.id == @team.owner_id
+      @agenda.destroy
+      AgendaMailer.sendmail_agenda(@users).deliver
+      redirect_to dashboard_url, notice: 'アジェンダを削除しました'
+    else
+      redirect_to dashboard_url, notice: '権限がありません'
+    end
   end
 
   private
@@ -35,4 +42,5 @@ class AgendasController < ApplicationController
   def agenda_params
     params.fetch(:agenda, {}).permit %i[title description]
   end
+
 end

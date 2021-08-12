@@ -38,7 +38,7 @@
               </p>
             </a>
 
-            <p><%= button_to '削除', agenda_path(agenda.id), method: :delete %></p>
+            <%= button_to '削除', agenda_path(agenda.id), method: :delete %>
 
             <ul class="nav nav-treeview" style="display: block;">
               <% agenda.articles.each do |article| %>
