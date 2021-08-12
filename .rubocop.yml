@@ -17,7 +17,7 @@ Style/StringLiterals:
 
 Layout/EmptyLinesAroundAttributeAccessor:
   Enabled: true
-  
+
 Layout/SpaceAroundMethodCallOperator:
   Enabled: true
 
@@ -128,7 +128,7 @@ Style/AccessorGrouping:
 
 Style/BisectedAttrAccessor:
   Enabled: true
-  
+
 Style/ExponentialNotation:
   Enabled: true
 
